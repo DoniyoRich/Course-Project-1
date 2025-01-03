@@ -33,6 +33,10 @@ warn_return_any = true
 strict_optional = true
 exclude = "(.venv)"
 
+[[tool.mypy.overrides]]
+module = ["untyped_package.*"]
+follow_untyped_imports = true
+
 [tool.isort]
 # максимальная длина строки
 line_length = 119

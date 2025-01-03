@@ -1,13 +1,13 @@
 import json
 import logging
+from datetime import datetime
 from json import JSONDecodeError
 from pathlib import Path
 
 from dotenv import load_dotenv
-from datetime import datetime
 
 from src.utils import greeting
-from src.views import read_excel_and_filter_by_dates, every_card_details
+from src.views import cards_total_spent, read_excel_and_filter_by_dates
 
 BASE_DIR = str(Path(__file__).parent.parent)  # корневая папка проекта
 transactions_path = BASE_DIR + '\\data'
@@ -27,11 +27,14 @@ load_dotenv(BASE_DIR + '\\.env')
 
 def main():
     """ Основная функция программы, точка входа"""
-    current_date_str = "30.12.2021 16:27:01"
+    current_date_str = "15.12.2021 16:27:01"
     current_date = datetime.strptime(current_date_str, '%d.%m.%Y %H:%M:%S')
     start_date = current_date.replace(day=1, hour=0, minute=0, second=0)
 
-    greeting_mes = greeting(current_date)
+    # формируем приветствие в зависимости от времени суток
+    # берется от текущей даты и времени, предоставленной пользователем
+    greeting_message = greeting(current_date)
+    print(greeting_message)
 
     try:
         with open(BASE_DIR + r'\user_settings.json') as u_sets:
@@ -53,8 +56,15 @@ def main():
         print("Ошибка чтения файла json")
         main_logger.error("Ошибка чтения файла json")
 
-    filtered_by_dates = read_excel_and_filter_by_dates(transactions_path + r'\operations.xlsx', start_date, current_date)
-    cards = every_card_details(filtered_by_dates)
+    # читаем файл с транзакциями
+    # и формируем датасет, состоящий из транзакций (только платежи) согласно заданного диапазона
+    # и очищенный от записей с отсутствующими номерами карт
+    filtered_by_dates = read_excel_and_filter_by_dates(transactions_path + r'\operations.xlsx', start_date,
+                                                       current_date)
+
+    # получаем список словарей, где ключами являются номер карты, общая сумма расходов, кэшбэк
+    cards_total_expences = cards_total_spent(filtered_by_dates)
+    print(cards_total_expences)
 
 
 # Запуск программы

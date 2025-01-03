@@ -1,32 +1,7 @@
-import os
+from typing import Any
 
-import requests
+# import requests
 from black import datetime
-
-
-def get_current_date() -> str:
-    """
-    Функция возвращает дату, введенную пользователем в строковом формате.
-    Запрос от пользователя происходит до тех пор, пока не будет введена дата в требуемом формате.
-    """
-    correct_date = {
-        'days': list(range(1, 32)),
-        'months': list(range(1, 13)),
-        'years': list(range(1900, 2025))
-    }
-    while True:
-        try:
-            date_curr = input("\nВведите текущую дату в формате дд.мм.гггг ЧЧ:ММ:СС : ").split(".")
-            if int(date_curr[0]) in correct_date['days'] and int(date_curr[1]) in correct_date['months'] and (
-                    int(date_curr[2])) in \
-                    correct_date['years']:
-                return '.'.join(date_curr)
-            else:
-                print('Что то не так с датой, попробуйте снова')
-                continue
-        except Exception:
-            print("Неверный ввод, попробуйте снова")
-            continue
 
 
 def greeting(date_: datetime) -> str:
@@ -44,6 +19,25 @@ def greeting(date_: datetime) -> str:
         message = "Доброй ночи"
 
     return message
+
+
+def get_cards_and_expences_only(dict_) -> tuple[list[Any], list[Any]]:
+    # собираем только те строки, в которых есть номера карт и сумма транзакции отрицательна,
+    # что означает, что берем только платежи (расходы)
+    cards = []
+    expences_only = []
+    for trans in dict_:
+        try:
+            if float(trans['Сумма операции']) < 0:
+                cards.append(trans['Номер карты'][-5:])
+                expences_only.append(trans)
+        except Exception:
+            continue
+
+    # Собираем список из уникальных номеров карт
+    cards = list(set(cards))
+
+    return cards, expences_only
 
 # def convert_curr(from_: list[str], to_: str) -> float:
 #     """ Функция обращается к внешнему API и производит конвертацию валюты. """
