@@ -1,7 +1,9 @@
 from typing import Any
 
+import pandas as pd
 # import requests
 from black import datetime
+from pandas import DataFrame
 
 
 def greeting(date_: datetime) -> str:
@@ -21,7 +23,7 @@ def greeting(date_: datetime) -> str:
     return message
 
 
-def get_cards_and_expences_only(dict_) -> tuple[list[Any], list[Any]]:
+def get_cards_and_expences_only(dict_) -> tuple[list[Any], DataFrame]:
     # собираем только те строки, в которых есть номера карт и сумма транзакции отрицательна,
     # что означает, что берем только платежи (расходы)
     cards = []
@@ -37,7 +39,10 @@ def get_cards_and_expences_only(dict_) -> tuple[list[Any], list[Any]]:
     # Собираем список из уникальных номеров карт
     cards = list(set(cards))
 
-    return cards, expences_only
+    # датафрейм только по платежам, очищенный от отсутствующих номеров карт
+    expences = pd.DataFrame(expences_only)
+
+    return cards, expences
 
 # def convert_curr(from_: list[str], to_: str) -> float:
 #     """ Функция обращается к внешнему API и производит конвертацию валюты. """
