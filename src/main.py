@@ -7,9 +7,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from src.utils import greeting
-from src.views import cards_total_spent, \
-    read_excel_and_filter_by_dates, get_top_transactions, \
-    get_currency_rates, get_stock_prices
+from src.views import (cards_total_spent, get_currency_rates, get_stock_prices, get_top_transactions,
+                       read_excel_and_filter_by_dates)
 
 BASE_DIR = str(Path(__file__).parent.parent)  # корневая папка проекта
 transactions_path = BASE_DIR + '\\data'
@@ -60,14 +59,6 @@ def main(date_curr: str) -> str:
             sets = json.load(u_sets)
             currencies = sets.get('user_currencies', 0)
             stocks = sets.get('user_stocks', 0)
-            print(currencies, stocks)
-            if currencies and stocks:
-                pass
-                # print("Все ок")
-                # convert_curr(currencies, 'RUB', stocks)
-            else:
-                print("Недостаточно данных для отображения")
-                main_logger.warning("Недостаточно данных для отображения")
 
     except FileNotFoundError:
         print("Нет такого файла")
@@ -76,8 +67,10 @@ def main(date_curr: str) -> str:
         print("Ошибка чтения файла json")
         main_logger.error("Ошибка чтения файла json")
 
-    currency_rates = get_currency_rates(currencies)
-    stock_prices = get_stock_prices(stocks)
+    currency_rates = get_currency_rates(currencies) # функция рабочая, просто временно отключена, чтобы экономить запросы
+    stock_prices = get_stock_prices(stocks)  # функция рабочая, просто временно отключена, чтобы экономить запросы
+    # stock_prices = []     # временная заглушка, потом нужно ее удалить и раскомментировать верхнюю строчку
+    # currency_rates = []     # временная заглушка, потом нужно ее удалить и раскомментировать верхнюю строчку
 
     # Формируем словарь перед конвертацией в json согласно формату, представленному в тз
     main_page = {

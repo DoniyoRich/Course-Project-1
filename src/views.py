@@ -131,12 +131,28 @@ def get_currency_rates(curr_list: list[str]) -> list[dict]:
     Функция получает список валют и возвращает их текущий курс.
     Используется API:
     """
-    API_KEY_CURR = os.getenv("API_KEY_CURR")
-    print(f'API для валют: {API_KEY_CURR}')
-    url = "https://api.apilayer.com/exchangerates_data/convert"
-    headers = {
-        "apikey": API_KEY_CURR
-    }
+    API_KEY = os.getenv("API_KEY")
+    response_list = []
+    for currency in curr_list:
+        response = requests.get(
+            f'https://api.apilayer.com/exchangerates_data/convert?to=RUB&from={currency}&amount=1&apikey={API_KEY}')
+        if response.status_code == 200:
+            # запрос успешный, можно распарсить ответ
+            response_list.append(
+                {
+                    "currency": currency,
+                    "rate": round(response.json()['info']['rate'], 2)
+                })
+        else:
+            print("\nЧто-то пошло не так с запросом на конвертацию валюты.")
+            views_logger.error("Что-то пошло не так с запросом на конвертацию валюты.")
+            response_list.append(
+                {
+                    "currency": currency,
+                    "rate": "N/A"
+                })
+
+    return response_list
 
 
 def get_stock_prices(stock_list: list[str]) -> list[dict]:
@@ -165,6 +181,5 @@ def get_stock_prices(stock_list: list[str]) -> list[dict]:
         else:
             print('\nЧто-то пошло не так с запросом на получение цен акций.')
             return []
-    print(stocks_price)
 
     return stocks_price

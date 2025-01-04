@@ -1,7 +1,6 @@
 from typing import Any
 
 import pandas as pd
-# import requests
 from black import datetime
 from pandas import DataFrame
 
@@ -43,45 +42,3 @@ def get_cards_and_expences_only(dict_) -> tuple[list[Any], DataFrame]:
     expences = pd.DataFrame(expences_only)
 
     return cards, expences
-
-# def convert_curr(from_: list[str], to_: str) -> float:
-#     """ Функция обращается к внешнему API и производит конвертацию валюты. """
-
-# API_KEY_CURR = os.getenv("API_KEY_CURR")
-# API_KEY_STOCK = os.getenv("API_KEY_STOCK")
-
-#     response = []
-#     for ind, currency in enumerate(from_):
-#         response[ind] = requests.get(
-#         f'https://api.apilayer.com/exchangerates_data/convert?to=]\
-#         {to_}&from={from_[ind]}&amount={trans_amount}&apikey={API_KEY_CURR}')
-#
-#     if response.status_code == 200:
-#         currency_rate = response.json()['info']['rate']
-#         result = response.json()['result']
-#         print(f"\nБыла произведена конвертация валюты из {from_} в {to_} по курсу: {currency_rate}")
-#     else:
-#         print("\nЧто-то пошло не так с запросом на конвертацию валюты.")
-#         result = -1
-#
-#     return result
-#
-#
-# url = "https://api.apilayer.com/exchangerates_data/convert"
-#
-# headers = {
-#     "apikey": API_KEY
-# }
-#
-# response = requests.get(url, headers=headers)
-#
-# user = "skypro-008"
-# url = f"https://api.github.com/users/{user}/repos"
-#
-# response = requests.get(url)
-#
-# repos = response.json()
-#
-# for repo in repos:
-#     if repo["language"] == "Python":
-#         print(f"Name: {repo['name']}\nLink: {repo['html_url']}\n")
