@@ -1,9 +1,9 @@
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional
 
 import pandas as pd
+from pandas import Series
 
 from src.utils import filter_by_dates
 
@@ -22,18 +22,25 @@ reports_logger.setLevel(logging.INFO)
 
 
 def spending_by_category(transactions: pd.DataFrame, months: int, category: str,
-                         date_: str) -> pd.DataFrame:
+                         date_: str) -> Series:
     """
     Функция принимает данные транзакций, категорию и исходную дату.
     Возвращается датафрейм, содержащий траты по заданной категории
     за последние три месяца от переданной даты.
     """
     current_date = datetime.strptime(date_, '%d.%m.%Y %H:%M:%S')
-    back_date = current_date + timedelta(days=months * (-30))
+    back_date = current_date - timedelta(days=months * 30)
 
+    # фильтруем датасет по датам
     filtered_by_dates = filter_by_dates(transactions, back_date, current_date)
-    excel_filtered = pd.DataFrame(filtered_by_dates)
-    excel_filtered.to_excel('test_excel.xlsx')
-    # print(filtered_by_dates)
+    df = pd.DataFrame(filtered_by_dates)
 
-    return excel_filtered
+    # выбираем только заданные категории
+    filtered_by_category = df.loc[df['Категория'] == category]
+
+    # находим общую сумму платежей по этой категории
+    expences_sum = filtered_by_category.agg({'Сумма операции': 'sum'})
+    filtered_by_category.to_excel(results_path + r'\categories_3_months.xlsx')
+    reports_logger.info("Запись файла categories_3_months.xlsx успешна.")
+
+    return expences_sum

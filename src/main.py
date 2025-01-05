@@ -110,11 +110,12 @@ if __name__ == '__main__':
         # -------------------- Отчеты --------------------
         # -------------- Траты по категориям -------------
 
-        category_name = 'Супермаркеты'
+        category_name = 'Фастфуд'
         months = 3
-        df_trans = pd.read_excel(transactions_path + r'\operations.xlsx')
-        spent_by_categories = spending_by_category(df_trans, months, category_name, current_date_str)
-        print(spent_by_categories)
+        spent_by_categories = spending_by_category(transactions, months, category_name, current_date_str)
+        print(f"\nТраты по категории '{category_name}' за {months} месяца(ев):")
+        print(spent_by_categories.to_dict())
 
     except FileNotFoundError:
+        print(f"Ошибка чтения файла {transactions_path + transaction_file}")
         main_logger.error(f"Ошибка чтения файла {transactions_path + transaction_file}")

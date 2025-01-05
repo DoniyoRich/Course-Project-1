@@ -102,7 +102,6 @@ def get_top_transactions(dict_: list) -> list[dict]:
 def get_currency_rates(curr_list: list[str]) -> list[dict]:
     """
     Функция получает список валют и возвращает их текущий курс.
-    Используется API:
     """
     API_KEY = os.getenv("API_KEY")
     response_list = []

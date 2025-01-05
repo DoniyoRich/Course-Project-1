@@ -95,6 +95,7 @@ def read_currencies_and_stocks_from_json() -> tuple[list[str], list[str]]:
             sets = json.load(u_sets)
             currencies = sets.get('user_currencies', 0)
             stocks = sets.get('user_stocks', 0)
+            utils_logger.info("Чтение файла user_settings.json успешно")
 
     except FileNotFoundError:
         print("Нет такого файла")
