@@ -6,12 +6,14 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from src.services import search_phones
 from src.utils import greeting
 from src.views import (cards_total_spent, get_currency_rates, get_stock_prices, get_top_transactions,
                        read_excel_and_filter_by_dates)
 
 BASE_DIR = str(Path(__file__).parent.parent)  # корневая папка проекта
 transactions_path = BASE_DIR + '\\data'
+results_path = BASE_DIR + '\\results'
 
 main_logs_path = BASE_DIR + r'\logs\main.log'
 
@@ -26,7 +28,7 @@ main_logger.setLevel(logging.INFO)
 load_dotenv(BASE_DIR + '\\.env')
 
 
-def main(date_curr: str) -> str:
+def main(date_curr: str, trans_source: str) -> str:
     """ Функция получает текущую дату и возвращает json ответ для главной страницы сайта"""
 
     current_date = datetime.strptime(date_curr, '%d.%m.%Y %H:%M:%S')
@@ -41,7 +43,7 @@ def main(date_curr: str) -> str:
     # читаем файл с транзакциями
     # и формируем датасет, состоящий из транзакций (только платежи) согласно заданного диапазона
     # и очищенный от записей с отсутствующими номерами карт
-    filtered_by_dates = read_excel_and_filter_by_dates(transactions_path + r'\operations.xlsx', start_date,
+    filtered_by_dates = read_excel_and_filter_by_dates(transactions_path + trans_source, start_date,
                                                        current_date)
     # получаем список словарей, где ключами являются номер карты, общая сумма расходов, кэшбэк
     cards_total_expences = cards_total_spent(filtered_by_dates)
@@ -67,10 +69,10 @@ def main(date_curr: str) -> str:
         print("Ошибка чтения файла json")
         main_logger.error("Ошибка чтения файла json")
 
-    currency_rates = get_currency_rates(currencies) # функция рабочая, просто временно отключена, чтобы экономить запросы
-    stock_prices = get_stock_prices(stocks)  # функция рабочая, просто временно отключена, чтобы экономить запросы
-    # stock_prices = []     # временная заглушка, потом нужно ее удалить и раскомментировать верхнюю строчку
-    # currency_rates = []     # временная заглушка, потом нужно ее удалить и раскомментировать верхнюю строчку
+    currency_rates = get_currency_rates(currencies)  # функция рабочая, временно отключена
+    stock_prices = get_stock_prices(stocks)  # функция рабочая, временно отключена
+    # stock_prices = []  # временная заглушка, потом нужно ее удалить и раскомментировать верхнюю строчку
+    # currency_rates = []  # временная заглушка, потом нужно ее удалить и раскомментировать верхнюю строчку
 
     # Формируем словарь перед конвертацией в json согласно формату, представленному в тз
     main_page = {
@@ -93,10 +95,27 @@ if __name__ == '__main__':
     # Фиксируем определенную дату для передачи в функцию
     current_date_str = "30.12.2021 19:27:01"
 
+    # источник данных
+    transactions = r'\operations.xlsx'
+
+    # Страница "Главная"
     # Готовый json ответ для главной страницы сайта
-    json_main_page = main(current_date_str)
+    json_main_page = main(current_date_str, transactions)
     print(json_main_page)
 
-    with open(BASE_DIR + r'\logs\main_page.json', 'w', encoding='UTF-8') as file_json:
+    with open(results_path + r'\main_page.json', 'w', encoding='UTF-8') as file_json:
         file_json.write(json_main_page)
         main_logger.info("файл main_page.json создан успешно")
+
+    # Страница "Сервисы"
+    # поиск по телефонным номерам
+    field_to_search = 'Описание'
+    regex_template = r'\d{3} \d{3}-\d{2}-\d{2}'
+    found_phones = search_phones(transactions, field_to_search, regex_template)
+
+    with open(results_path + r'\services.json', 'w', encoding='UTF-8') as file:
+        file.write(found_phones)
+        main_logger.info("файл services.json создан успешно")
+
+    print("\nВывожу список транзакций, в которых в описании имеется телефонный номер\n")
+    print(found_phones)

@@ -11,6 +11,7 @@ from src.utils import get_cards_and_expences_only
 
 BASE_DIR = str(Path(__file__).parent.parent)  # корневая папка проекта
 views_logs_path = BASE_DIR + r'\logs\views.log'
+results_path = BASE_DIR + '\\results'
 
 # настраиваем параметры логгирования
 views_logger = logging.getLogger("views")
@@ -77,9 +78,9 @@ def cards_total_spent(dict_: list) -> list[dict]:
 
     # Временный тестовый блок для проверки правильности работы функции.
     # Выводит результат работы функции в отдельный json файл в папке logs текущего проекта
-    with open(BASE_DIR + r'\logs\test_json.json', 'w', encoding='utf-8') as test_file:
+    with open(results_path + r'\json_out.json', 'w', encoding='utf-8') as test_file:
         json.dump(cards_expences, test_file, indent=4)
-        views_logger.info("файл test_json.json создан успешно")
+        views_logger.info("файл json_out.json создан успешно")
 
     return cards_expences
 
@@ -95,13 +96,13 @@ def get_top_transactions(dict_: list) -> list[dict]:
     sorted_by_amount = expences.sort_values(by='Сумма операции', ascending=True)
 
     # выводим в файл для проверки правильности сортировки (опционально)
-    sorted_by_amount.to_excel('test_sorted_by_amount.xlsx')
+    sorted_by_amount.to_excel(results_path + r'\sorted_by_amount.xlsx')
 
     # выбираем первые 5 транзакций после сортировки по убыванию
     top_5_expences = sorted_by_amount.iloc[:5]
 
     # выводим в файл для проверки правильности выборки (опционально)
-    top_5_expences.to_excel('test_top_5_expences.xlsx')
+    top_5_expences.to_excel(results_path + r'\top_5_expences.xlsx')
 
     # организуем список из топ 5 транзакций с дополнительными требуемыми полями
     top_5_list = []
@@ -119,9 +120,9 @@ def get_top_transactions(dict_: list) -> list[dict]:
             }
         )
 
-    with open(BASE_DIR + r'\logs\test_top_5_json.json', 'w', encoding='UTF-8') as test_file:
+    with open(results_path + r'\top_5_json.json', 'w', encoding='UTF-8') as test_file:
         json.dump(top_5_list, test_file, ensure_ascii=False, indent=4)
-        views_logger.info("файл test_top_5_json.json создан успешно")
+        views_logger.info("файл top_5_json.json создан успешно")
 
     return top_5_list
 
