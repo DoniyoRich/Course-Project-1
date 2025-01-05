@@ -9,7 +9,7 @@ BASE_DIR = str(Path(__file__).parent.parent)  # корневая папка пр
 views_logs_path = BASE_DIR + r'\logs\services.log'
 transactions_path = BASE_DIR + '\\data'
 
-# настраиваем параметры логгирования
+# настраиваем параметры логирования
 services_logger = logging.getLogger("services")
 file_handler = logging.FileHandler(views_logs_path, "w", encoding="UTF-8")
 file_formatter = logging.Formatter('%(asctime)s-%(name)s-%(levelname)s: %(message)s')
@@ -29,6 +29,7 @@ def search_phones(transactions: str, field_to_search: str, regex: str) -> str:
         trans = pd.read_excel(transactions_path + transactions)
         pattern = re.compile(regex)
         phones = trans[trans[field_to_search].str.contains(pattern)]
+
         # переводим датафрейм с найденными номерами телефонов
         # сначала в словарь, а затем в формат json
         phones_json = json.dumps(phones.to_dict(orient='records'), ensure_ascii=False, indent=4)

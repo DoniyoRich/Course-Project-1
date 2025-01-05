@@ -1,10 +1,8 @@
 import json
 import logging
 import os
-from datetime import datetime
 from pathlib import Path
 
-import pandas as pd
 import requests
 
 from src.utils import get_cards_and_expences_only
@@ -13,39 +11,13 @@ BASE_DIR = str(Path(__file__).parent.parent)  # корневая папка пр
 views_logs_path = BASE_DIR + r'\logs\views.log'
 results_path = BASE_DIR + '\\results'
 
-# настраиваем параметры логгирования
+# настраиваем параметры логирования
 views_logger = logging.getLogger("views")
 file_handler = logging.FileHandler(views_logs_path, "w", encoding="UTF-8")
 file_formatter = logging.Formatter('%(asctime)s-%(name)s-%(levelname)s: %(message)s')
 file_handler.setFormatter(file_formatter)
 views_logger.addHandler(file_handler)
 views_logger.setLevel(logging.INFO)
-
-
-def read_excel_and_filter_by_dates(file_path: str, start_date: datetime, current_date: datetime) -> list:
-    """ Функция принимает пусть к файлу формата excel и возвращает список словарей. """
-    try:
-        print("\nЧитаю excel файл с транзакциями, может занять некоторое время...")
-
-        # пытаемся открыть и сохранить датафрейм из эксель файла
-        transactions = pd.read_excel(file_path).to_dict(orient="records")
-
-        views_logger.info(f"Успешное чтение файла {file_path}")
-
-        # В этом списке будем собирать транзакции в заданном диапазоне дат
-        filtered_by_dates = []
-        for transaction in transactions:
-            transaction['date_formatted'] = \
-                datetime.strptime(transaction['Дата операции'], '%d.%m.%Y %H:%M:%S')
-            if transaction['Статус'] == 'OK':
-                if start_date <= transaction['date_formatted'] <= current_date:
-                    filtered_by_dates.append(transaction)
-
-        return filtered_by_dates
-
-    except FileNotFoundError:
-        views_logger.error(f"Ошибка чтения файла {file_path}")
-        return []
 
 
 def cards_total_spent(dict_: list) -> list[dict]:
