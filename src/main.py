@@ -70,10 +70,10 @@ if __name__ == '__main__':
         top_transactions = get_top_transactions(filtered_by_dates)
 
         currencies, stocks = read_currencies_and_stocks_from_json()
-        # currency_rates = get_currency_rates(currencies)  # функция рабочая, временно отключена
-        # stock_prices = get_stock_prices(stocks)  # функция рабочая, временно отключена
-        stock_prices = []  # временная заглушка, потом нужно ее удалить и раскомментировать верхнюю строчку
-        currency_rates = []  # временная заглушка, потом нужно ее удалить и раскомментировать верхнюю строчку
+        currency_rates = get_currency_rates(currencies)  # функция рабочая, временно отключена
+        stock_prices = get_stock_prices(stocks)  # функция рабочая, временно отключена
+        # stock_prices = []  # временная заглушка, потом нужно ее удалить и раскомментировать верхнюю строчку
+        # currency_rates = []  # временная заглушка, потом нужно ее удалить и раскомментировать верхнюю строчку
 
         # Формируем словарь перед конвертацией в json согласно формату, представленному в тз
         main_page = {
@@ -110,11 +110,11 @@ if __name__ == '__main__':
         # -------------------- Отчеты --------------------
         # -------------- Траты по категориям -------------
 
-        category_name = 'Фастфуд'
+        category_name = 'Супермаркеты'
         months = 3
         spent_by_categories = spending_by_category(transactions, months, category_name, current_date_str)
-        print(f"\nТраты по категории '{category_name}' за {months} месяца(ев):")
-        print(spent_by_categories.to_dict())
+        print("\nТраты по категориям:")
+        print(spent_by_categories)
 
     except FileNotFoundError:
         print(f"Ошибка чтения файла {transactions_path + transaction_file}")
