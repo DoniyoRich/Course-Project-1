@@ -71,7 +71,7 @@ def spending_by_category(transactions: pd.DataFrame, months: int, category: str,
     df = pd.DataFrame(filtered_by_dates)
 
     # выбираем только заданные категории
-    filtered_by_category = df.loc[df['Категория'] == category]
+    filtered_by_category = df.loc[(df['Категория'] == category) & (df['Статус'] == 'OK')]
 
     # находим общую сумму платежей по этой категории
     expences_sum = filtered_by_category.agg({'Сумма операции': 'sum'})

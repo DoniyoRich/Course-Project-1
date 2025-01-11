@@ -29,6 +29,7 @@ def cards_total_spent(dict_: list) -> list[dict]:
 
     #  уникальные номера карт и датафрейм только по платежам, очищенный от отсутствующих номеров карт
     cards, expences = get_cards_and_expences_only(dict_)
+    # print(get_cards_and_expences_only(dict_))
 
     # собираем список транзакций, отдельно по каждой карте
     cards_df = []
@@ -68,13 +69,13 @@ def get_top_transactions(dict_: list) -> list[dict]:
     sorted_by_amount = expences.sort_values(by='Сумма операции', ascending=True)
 
     # выводим в файл для проверки правильности сортировки (опционально)
-    sorted_by_amount.to_excel(results_path + r'\sorted_by_amount.xlsx')
+    # sorted_by_amount.to_excel(results_path + r'\sorted_by_amount.xlsx')
 
     # выбираем первые 5 транзакций после сортировки по убыванию
     top_5_expences = sorted_by_amount.iloc[:5]
 
     # выводим в файл для проверки правильности выборки (опционально)
-    top_5_expences.to_excel(results_path + r'\top_5_expences.xlsx')
+    # top_5_expences.to_excel(results_path + r'\top_5_expences.xlsx')
 
     # организуем список из топ 5 транзакций с дополнительными требуемыми полями
     top_5_list = []
@@ -105,9 +106,12 @@ def get_currency_rates(curr_list: list[str]) -> list[dict]:
     """
     API_KEY = os.getenv("API_KEY")
     response_list = []
+    convert_to = 'RUB'
+    amount = 1
     for currency in curr_list:
+        url = 'https://api.apilayer.com/exchangerates_data/convert'
         response = requests.get(
-            f'https://api.apilayer.com/exchangerates_data/convert?to=RUB&from={currency}&amount=1&apikey={API_KEY}')
+            f'{url}?to={convert_to}&from={currency}&amount={amount}&apikey={API_KEY}')
         if response.status_code == 200:
             # запрос успешный, можно распарсить ответ
             response_list.append(

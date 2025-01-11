@@ -5,6 +5,8 @@ from pathlib import Path
 
 import pandas as pd
 
+pd.set_option('future.no_silent_downcasting', True)
+
 BASE_DIR = str(Path(__file__).parent.parent)  # корневая папка проекта
 views_logs_path = BASE_DIR + r'\logs\services.log'
 transactions_path = BASE_DIR + '\\data'
@@ -28,7 +30,7 @@ def search_phones(transactions: str, field_to_search: str, regex: str) -> str:
     try:
         trans = pd.read_excel(transactions_path + transactions)
         pattern = re.compile(regex)
-        phones = trans[trans[field_to_search].str.contains(pattern)]
+        phones = trans[trans[field_to_search].str.contains(pattern)].fillna(0)
 
         # переводим датафрейм с найденными номерами телефонов
         # сначала в словарь, а затем в формат json

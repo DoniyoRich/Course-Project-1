@@ -1,11 +1,13 @@
 import json
 import logging
+from datetime import datetime
 from json import JSONDecodeError
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
-from black import datetime
+
+pd.options.mode.chained_assignment = None
 
 BASE_DIR = str(Path(__file__).parent.parent)  # корневая папка проекта
 
@@ -38,6 +40,11 @@ def greeting(date_: datetime) -> str:
 
 
 def get_cards_and_expences_only(dict_) -> tuple[list[Any], pd.DataFrame]:
+    """
+    Функция возвращает кортеж, состоящий из списка уникальных номеров карт
+    и датафрейма, состоящий только из платежей (суммы транзакций отрицательные),
+    и очищенный от отсутствующих номеров карт.
+    """
     # собираем только те строки, в которых есть номера карт и сумма транзакции отрицательна,
     # что означает, что берем только платежи (расходы)
     cards = []
@@ -45,13 +52,14 @@ def get_cards_and_expences_only(dict_) -> tuple[list[Any], pd.DataFrame]:
     for trans in dict_:
         try:
             if float(trans['Сумма операции']) < 0:
-                cards.append(trans['Номер карты'][-5:])
+                if not trans['Номер карты'] in cards:
+                    cards.append(trans['Номер карты'])
                 expences_only.append(trans)
         except Exception:
             continue
 
     # Собираем список из уникальных номеров карт
-    cards = list(set(cards))
+    cards = sorted(cards)
 
     # датафрейм только по платежам, очищенный от отсутствующих номеров карт
     expences = pd.DataFrame(expences_only)
@@ -65,19 +73,27 @@ def filter_by_dates(transactions: pd.DataFrame, start_date: datetime, current_da
     и выделяет диапазон в пределах от start_date и current_date.
     Берутся только успешные транзакции (со статусом ОК).
     """
+    # преобразовываем поле даты в формат даты pandas
+    transactions['Дата операции'] = pd.to_datetime(transactions['Дата операции'], dayfirst=True)
 
-    trans = transactions.to_dict(orient="records")
+    # фильтруем по диапазону дат
+    filtered_by_dates_df = transactions[(transactions['Дата операции'].between(start_date, current_date))]
 
-    # В этом списке будем собирать транзакции в заданном диапазоне дат
-    filtered_by_dates = []
-    for transaction in trans:
-        transaction['date_formatted'] = \
-            datetime.strptime(transaction['Дата операции'], '%d.%m.%Y %H:%M:%S')
-        if transaction['Статус'] == 'OK':
-            if start_date <= transaction['date_formatted'] <= current_date:
-                filtered_by_dates.append(transaction)
+    # берем только успешные транзакции
+    filtered_by_dates_OK = filtered_by_dates_df[filtered_by_dates_df['Статус'] == 'OK']
 
-    return filtered_by_dates
+    # исключаем Nan поля в столбце "Номер карты"
+    filtered_by_dates_OK_noNANs = filtered_by_dates_OK.dropna(subset=['Номер карты'])
+
+    # возвращаем поле даты обратно в строковый формат (далее нам понадобится именно строковое представление)
+    filtered_by_dates_OK_noNANs['Дата операции'] = filtered_by_dates_OK_noNANs['Дата операции'].dt.strftime(
+        '%d.%m.%Y %H:%M:%S')
+
+    # очищаем весь датафрейм от полей Nan, записываем туда нули. Иначе с тестами возникнут сложности
+    filtered_by_dates_OK_noNANs = filtered_by_dates_OK_noNANs.fillna(0)
+
+    # возвращаем датафрейм, преобразованный в список
+    return filtered_by_dates_OK_noNANs.to_dict(orient="records")
 
 
 def read_currencies_and_stocks_from_json() -> tuple[list[str], list[str]]:
@@ -97,9 +113,6 @@ def read_currencies_and_stocks_from_json() -> tuple[list[str], list[str]]:
             stocks = sets.get('user_stocks', 0)
             utils_logger.info("Чтение файла user_settings.json успешно")
 
-    except FileNotFoundError:
-        print("Нет такого файла")
-        utils_logger.error("Нет такого файла")
     except JSONDecodeError:
         print("Ошибка чтения файла json")
         utils_logger.error("Ошибка чтения файла json")

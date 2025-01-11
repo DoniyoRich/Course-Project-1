@@ -28,20 +28,24 @@ main_logger.setLevel(logging.INFO)
 # загружаем ключи
 load_dotenv(BASE_DIR + '\\.env')
 
-# Фиксируем определенную дату для передачи в функцию
-current_date_str = "30.12.2021 19:27:01"
 
-# источник данных
-transaction_file = r'\operations.xlsx'
+def app_main(current_date_str: str, transaction_file: str) -> None:
+    """
+    Основная функция, объединяющая все модули приложения.
+    Переменные stock_prices и currency_rates на 80 и 81 строчке
+    были введены временно в качестве заглушек, чтобы не тратить
+    драгоценный лимит на запрос по API)).
+    """
 
-# Запуск программы, точка входа
-if __name__ == '__main__':
+    # BASE_DIR = str(Path(__file__).parent.parent)  # корневая папка проекта
+    # transactions_path = BASE_DIR + '\\data'
+    # results_path = BASE_DIR + '\\results'
 
     print("\nЧитаю excel файл с транзакциями, может занять некоторое время...")
 
     try:
         # пытаемся открыть и сохранить датафрейм из эксель файла
-        transactions = pd.read_excel(transactions_path + transaction_file)
+        transactions = pd.read_excel(transactions_path + transaction_file)  # оригинал
         main_logger.info(f"Успешное чтение файла {transactions_path + transaction_file}")
 
         # -------------------- Веб-страница --------------------
@@ -119,3 +123,14 @@ if __name__ == '__main__':
     except FileNotFoundError:
         print(f"Ошибка чтения файла {transactions_path + transaction_file}")
         main_logger.error(f"Ошибка чтения файла {transactions_path + transaction_file}")
+
+
+# Запуск программы, точка входа
+if __name__ == '__main__':
+    # Фиксируем определенную дату для передачи в функцию
+    current_date = "30.12.2021 11:27:01"
+
+    # источник данных
+    transaction_file = r'\operations.xlsx'
+
+    app_main(current_date, transaction_file)

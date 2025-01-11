@@ -1,11 +1,13 @@
 from datetime import datetime
+from unittest.mock import mock_open, patch
 
 import pandas as pd
 import pytest
 
-from src.utils import greeting, filter_by_dates
+from src.utils import filter_by_dates, greeting, read_currencies_and_stocks_from_json
 
 
+# ТЕСТ PASSED
 @pytest.mark.parametrize(
     'date_, greet', [
         (datetime(2021, 12, 30, 19, 27, 7), 'Добрый вечер'),
@@ -15,22 +17,31 @@ from src.utils import greeting, filter_by_dates
     ]
 )
 def test_greeting(date_: datetime, greet: str) -> None:
+    """ Тест проверяет корректность возвращаемого приветствия. """
     assert greeting(date_) == greet
 
 
+# ТЕСТ PASSED
 def test_filter_by_dates(source_dataframe: pd.DataFrame, filtered_by_dates_df: pd.DataFrame) -> None:
+    """ Тест проверяет правильность выборки по диапазону дат. """
     start_date = datetime(2021, 10, 1, 0, 0, 0)
     current_date = datetime(2021, 10, 8, 8, 24, 0)
-    assert filter_by_dates(source_dataframe, start_date, current_date) == filtered_by_dates_df
-    # pd.testing.assert_series_equal(pd.DataFrame(filter_by_dates(source_dataframe, start_date, current_date)), filtered_by_dates_df)
+    expected = filtered_by_dates_df.to_dict(orient="records")
+    assert filter_by_dates(source_dataframe, start_date, current_date) == expected
 
-# def test_df():
-#     df1=pd.DataFrame({'a':[1,2,3,4,5]})
-#     df2=pd.DataFrame({'a':[6,7,8,9,11]})
-#
-#     expected_res=pd.Series([7,9,11,13,16])
-#     pd.testing.assert_series_equal((df1['a']+df2['a']),expected_res,check_names=False)
 
-# import pandas as pd
-# pd.testing.assert_frame_equal(spending_by_category(sample_df, "Переводы", date="31.10.2024"), df_by_category)
-# assert_frame_equal(mock_obj.call_args.args[0]['first_dict_key_which_points_to_a_df'], expected_df)
+# ТЕСТ PASSED
+@patch('builtins.open', new_callable=mock_open,
+       read_data='{"user_currencies": ["USD", "EUR"], "user_stocks": ["AAPL", "AMZN", "GOOG", "MSFT", "TSLA"]}')
+def test_read_currencies_and_stocks_from_json(mocked) -> None:
+    """ Тест на правильность возвращения кортежа из списка валют и акций. """
+    assert read_currencies_and_stocks_from_json() == (
+        ["USD", "EUR"], ["AAPL", "AMZN", "GOOG", "MSFT", "TSLA"]
+    )
+
+
+# ТЕСТ PASSED
+@patch('builtins.open', new_callable=mock_open, read_data='')
+def test_read_currencies_and_stocks_from_json_empty(mocked) -> None:
+    """ Тест на пустой файл json. """
+    assert read_currencies_and_stocks_from_json() == ([], [])
